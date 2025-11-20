@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: #05060c;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            padding: 32px 16px;
+        }
+
+        .card {
+            width: 700px;
+            background: #121212;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-sizing: border-box;
+        }
+
+        .header {
+            height: 220px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 0%, #121212 100%);
+        }
+
+        .content {
+            padding: 32px;
+            position: relative;
+            margin-top: -80px;
+            z-index: 10;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .game-title {
+            font-size: 32px;
+            font-weight: 800;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+            margin: 0;
+        }
+
+        .player-name {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 4px;
+        }
+
+        .progress-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-circle {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+
+            background: conic-gradient(#3b82f6 {
+                        {
+                        rate
+                    }
+                }
+
+                %, rgba(255, 255, 255, 0.1) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            background: #121212;
+            border-radius: 50%;
+        }
+
+        .progress-text {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .progress-details {
+            flex: 1;
+        }
+
+        .progress-stat {
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 2px;
+        }
+
+        .ach-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .ach-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .ach-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .ach-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .ach-name {
+            font-size: 12px;
+            color: #eee;
+            line-height: 1.3;
+            font-weight: 500;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header" style="background-image: url('{{ game_cover }}');">
+        </div>
+        <div class="content">
+            <div class="game-info">
+                <div>
+                    <div class="player-name">{{ player_name }} 的成就进度</div>
+                    <div class="game-title">{{ game.name }}</div>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-circle">
+                    <div class="progress-text">{{ rate }}%</div>
+                </div>
+                <div class="progress-details">
+                    <div class="progress-stat">{{ unlocked }} <span style="font-size:16px; color:#777;">/ {{ total
+                            }}</span></div>
+                    <div class="progress-label">已解锁成就</div>
+                </div>
+            </div>
+
+            <div class="section-title">最近解锁</div>
+            <div class="ach-grid">
+                {% for ach in achievements %}
+                <div class="ach-item">
+                    <img src="{{ ach.icon }}" class="ach-icon">
+                    <div class="ach-name">{{ ach.name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

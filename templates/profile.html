@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steam Profile</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #0f0f12;
+            --card-bg: rgba(20, 20, 25, 0.6);
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --accent: #3b82f6;
+            --online: #4ade80;
+            --offline: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-primary);
+            height: 100%;
+            min-height: 100vh;
+        }
+
+        body {
+            padding: 40px;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+
+        /* Dynamic Background */
+        .bg-image {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(60px) brightness(0.4) saturate(1.2);
+            transform: scale(1.1);
+        }
+
+        .container {
+            width: 880px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Profile Section */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 4px solid #1a1a1a;
+            z-index: 2;
+        }
+
+        .status-online {
+            background-color: var(--online);
+            box-shadow: 0 0 12px var(--online);
+        }
+
+        .status-offline {
+            background-color: var(--offline);
+        }
+
+        .user-info {
+            flex-grow: 1;
+        }
+
+        .user-info h1 {
+            margin: 0;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .user-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Recent Activity */
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.2s;
+        }
+
+        .game-cover {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .game-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .game-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Top Games - Mosaic Grid */
+        .top-games-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-auto-rows: 60px;
+            grid-auto-flow: dense;
+            gap: 0;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .top-game-item {
+            position: relative;
+            overflow: hidden;
+            background: #1a1a1a;
+            transition: filter 0.2s;
+        }
+
+        .top-game-item:hover {
+            z-index: 10;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .top-game-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Overlay Info */
+        .top-game-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+
+        .top-game-item:hover .top-game-info,
+        .span-4x4 .top-game-info,
+        .span-2x2 .top-game-info {
+            opacity: 1;
+        }
+
+        .top-game-name {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .top-game-hours {
+            font-size: 10px;
+            opacity: 0.8;
+            color: var(--accent);
+        }
+
+        /* Grid Spans */
+        .span-4x4 {
+            grid-column: span 4;
+            grid-row: span 4;
+        }
+
+        .span-4x4 .top-game-name {
+            font-size: 18px;
+        }
+
+        .span-4x4 .top-game-hours {
+            font-size: 14px;
+        }
+
+        .span-2x2 {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .span-2x2 .top-game-name {
+            font-size: 14px;
+        }
+
+        .span-2x1 {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .span-1x2 {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .span-1x1 {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
+
+        /* Private Profile State */
+        .private-profile {
+            text-align: center;
+            padding: 64px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .private-icon {
+            font-size: 64px;
+            background: rgba(255, 255, 255, 0.05);
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-bottom: 8px;
+        }
+
+        .private-profile h2 {
+            margin: 0;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Dynamic Background -->
+    <div class="bg-image" style="background-image: url('{{ hero_cover }}');"></div>
+
+    <div class="container">
+        {% if is_private %}
+        <div class="card private-profile">
+            <div class="private-icon">🔒</div>
+            <h2>此个人资料是私密的</h2>
+            <p>无法获取游戏列表和最近活动，请检查隐私设置。</p>
+        </div>
+        {% else %}
+
+        <!-- Profile Header -->
+        <div class="card profile-header">
+            <div class="avatar-wrapper">
+                <img src="{{ player.avatarfull }}" alt="Avatar" class="avatar">
+                <div
+                    class="status-indicator {% if player.personastate == 1 %}status-online{% else %}status-offline{% endif %}">
+                </div>
+            </div>
+            <div class="user-info">
+                <h1>{{ player.personaname }}</h1>
+                <div class="user-meta">
+                    <span>🆔 {{ player.steamid }}</span>
+                    {% if player.loccountrycode %}
+                    <span>📍 {{ player.loccountrycode }}</span>
+                    {% endif %}
+                </div>
+                <div class="user-meta" style="margin-top: 12px; font-size: 13px; opacity: 0.8;">
+                    <span>🎮 游戏总数: {{ total_games }}</span>
+                    <span>⏱️ 总时长: {{ total_playtime }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Mode: Playing Now & Recent Activity -->
+        {% if mode == 'summary' %}
+
+        <!-- Playing Now -->
+        {% if playing_game %}
+        <div class="card" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3);">
+            <div class="section-title" style="color: #60a5fa;">正在游玩</div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <img src="{{ playing_game.cover_uri }}"
+                    style="width: 180px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <div>
+                    <div style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">{{ playing_game.name }}</div>
+                    <div style="color: #93c5fd; font-size: 14px;">正在游戏中...</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Activity -->
+        {% if recent_games %}
+        <div>
+            <div class="section-title">最近两周动态</div>
+            <div class="recent-grid">
+                {% for game in recent_games %}
+                <div class="game-card">
+                    <img src="{{ game.cover_uri }}" class="game-cover" alt="{{ game.name }}">
+                    <div class="game-name">{{ game.name }}</div>
+                    <div class="game-time">{{ game.playtime_2weeks_formatted }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <!-- Library Mode: Mosaic Wall -->
+        {% if mode == 'library' and owned_games %}
+        <div>
+            <div class="section-title">游戏库精选 (Mosaic Wall)</div>
+            <div class="top-games-grid">
+                {% for game in owned_games %}
+                <div class="top-game-item {{ game.grid_class }}">
+                    <img src="{{ game.cover_uri }}"
+                        alt="{{ game.name }}" loading="lazy">
+                    <div class="top-game-info">
+                        <div class="top-game-name">{{ game.name }}</div>
+                        <div class="top-game-hours">{{ game.playtime_forever_formatted }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% endif %}
+    </div>
+</body>
+
+</html>

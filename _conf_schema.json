@@ -1,0 +1,20 @@
+{
+    "steam_api_key": {
+        "description": "Steam Web API Key (Get it from: https://steamcommunity.com/dev/apikey)",
+        "type": "string",
+        "hint": "Required for fetching Steam data.",
+        "obvious_hint": true
+    },
+    "proxy": {
+        "description": "HTTP/HTTPS Proxy (e.g., http://127.0.0.1:7890)",
+        "type": "string",
+        "hint": "Optional. Useful if Steam API is blocked.",
+        "default": ""
+    },
+    "image_quality": {
+        "description": "Rendered image quality (10-100)",
+        "type": "int",
+        "default": 90,
+        "hint": "Larger value = clearer but bigger files."
+    }
+}
