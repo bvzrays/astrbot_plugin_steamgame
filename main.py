@@ -11,7 +11,7 @@ from astrbot.api import logger
 from astrbot.api import message_components as Comp
 from .steam_api import SteamAPI
 
-@register("steam_game", "AstrBotDev", "Steam Player Data Visualization", "1.0.0", "https://github.com/AstrBot-Plugins/astrbot_plugin_steamgame")
+@register("steam_game", "bvzrays", "Steam Player Data Visualization", "1.0.0", "https://github.com/bvzrays/astrbot_plugin_steamgame")
 class SteamGamePlugin(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)

@@ -1,5 +1,5 @@
 name: astrbot_plugin_steamgame
-version: 1.0.0
-author: AstrBotDev
-description: Steam 玩家数据可视化插件 / Steam Player Data Visualization Plugin
-url: https://github.com/AstrBot-Plugins/astrbot_plugin_steamgame
+version: 1.2.0
+author: bvzrays
+description: Steam 玩家数据可视化插件
+url: https://github.com/bvzrays/astrbot_plugin_steamgame
