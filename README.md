@@ -2,7 +2,8 @@
 
 一个用于 AstrBot 的 Steam 玩家数据可视化插件，生成精美图，支持群排行、好友对比、成就卡片、热点游戏推荐、VAC 提示与 Steam 联动等功能。
 
-> ✅ **建议在这里插入“功能总览”截图（1200px 宽）**
+> <img width="1302" height="568" alt="image" src="https://github.com/user-attachments/assets/a9995a1f-870b-40c0-9671-bde89dabb999" />
+
 
 ---
 
@@ -12,35 +13,41 @@
 
 ### 1. 个人资料 & 最近动态（`/steam动态`）
 - 展示头像、在线状态、最近游玩
-- **截图位置**：此段落下方，命名 `docs/profile.jpg`
+- ![9c62564b0dc74fb197895a6b85a3d1fc](https://github.com/user-attachments/assets/bb432769-e159-437a-97a3-db878f2bab24)
+
 
 ### 2. Mosaic 游戏墙（`/steam游戏库`）
 - 依据游玩时长自动排布封面墙
-- **截图位置**：此段落下方，命名 `docs/mosaic.jpg`
+- ![fe1cb0f01a34223be1ed43672b078241](https://github.com/user-attachments/assets/99d3351b-18cb-4e89-a0ca-7891f7fe58c1)
+
 
 ### 3. 成就卡片（`/steam成就 <游戏名>`）
 - 进度环 + 最近解锁成就
-- **截图位置**：此段落下方，命名 `docs/achievements.jpg`
+- ![0272cd13cd5cd9a7677c6f69804a65fb](https://github.com/user-attachments/assets/072b1406-0e2f-4b5f-a44d-505cd9567c68)
+
 
 ### 4. 好友对比（`/steam对比 @用户`）
 - 多维 PK 卡片（游戏数 / 总时长 / 成就），共同游戏墙
-- **截图位置**：此段落下方，命名 `docs/compare.jpg`
+- ![742a46638fb5e35c2ba08c7a4c1a009f](https://github.com/user-attachments/assets/ae377c79-5d9e-4626-a1d5-a0e0556f917b)
+
 
 ### 5. 群内排行（`/steam排行 [游戏数/时长/关键词]`）
 - 群友拥有/游玩数据排行榜
-- **截图位置**：此段落下方，命名 `docs/rank.jpg`
+- ![5f7249cf60b49c7d41d71a7e08dbdb6b](https://github.com/user-attachments/assets/96913c05-efa2-40f3-936d-f2dc145cc6ca)
+
 
 ### 6. 群聊热门推荐（`/steam推荐`）
 - 根据群友游玩时长推荐你未拥有的热门游戏（渲染图示含拥有者头像）
-- **截图位置**：此段落下方，命名 `docs/recommend.jpg`
+- ![4039cecfb844cb25adf9fa6fa9009c72](https://github.com/user-attachments/assets/a4055ca2-a7f9-4b55-a77e-fd6d6d19e066)
+
 
 ### 7. VAC / Ban 状态提示（`/steam动态` 与 `/steam游戏库`）
 - 在个人卡片中高亮 VAC / Game / Community Ban 状态
-- **截图位置**：可与“个人资料”同图
+- <img width="276" height="43" alt="image" src="https://github.com/user-attachments/assets/09249bf9-8a7c-4b7c-afb8-5c3c45fba312" />
+
 
 ### 8. Steam 联动（`/steam联动`）
 - 列出群友之间的 Steam 好友关系以及正在一起游玩的游戏
-- **截图位置**：可插入命令输出示例
 
 ---
 
