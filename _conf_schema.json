@@ -1,20 +1,30 @@
 {
     "steam_api_key": {
-        "description": "Steam Web API Key (Get it from: https://steamcommunity.com/dev/apikey)",
+        "description": "Steam Web API Key（前往 https://steamcommunity.com/dev/apikey 获取）",
         "type": "string",
-        "hint": "Required for fetching Steam data.",
+        "hint": "用于调用 Steam 官方 API，必填",
         "obvious_hint": true
     },
     "proxy": {
-        "description": "HTTP/HTTPS Proxy (e.g., http://127.0.0.1:7890)",
+        "description": "HTTP/HTTPS 代理（如 http://127.0.0.1:7890）",
         "type": "string",
-        "hint": "Optional. Useful if Steam API is blocked.",
+        "hint": "可选，网络无法直连 Steam 时使用",
         "default": ""
     },
     "image_quality": {
-        "description": "Rendered image quality (10-100)",
+        "description": "渲染图片质量（10-100）",
         "type": "int",
         "default": 90,
-        "hint": "Larger value = clearer but bigger files."
+        "hint": "数值越大越清晰，同时体积也越大"
+    },
+    "recommend_source_limit": {
+        "description": "每位群友用于推荐的“高时长”游戏数量",
+        "type": "int",
+        "default": 40
+    },
+    "recommend_result_limit": {
+        "description": "推荐结果条数",
+        "type": "int",
+        "default": 6
     }
 }

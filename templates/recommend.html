@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: 'Inter', sans-serif;
+            color: white;
+        }
+
+        body {
+            width: 800px;
+            background: #121212;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 32px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .target {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .target img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .recommend-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .recommend-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .cover {
+            width: 100px;
+            height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .stat {
+            font-size: 13px;
+            color: #a3aed0;
+        }
+
+        .owners {
+            display: flex;
+            gap: 6px;
+        }
+
+        .owners img {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footnote {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <div class="title">群友热门推荐</div>
+            <div class="subtitle">大家都在玩，但你还没拥有的游戏</div>
+        </div>
+        <div class="target">
+            <img src="{{ target.avatar }}">
+            <div>{{ target.personaname }}</div>
+        </div>
+    </div>
+
+    <div class="recommend-list">
+        {% for game in recommendations %}
+        <div class="recommend-item">
+            <img src="{{ game.cover_uri }}" class="cover">
+            <div class="info">
+                <div class="info-header">
+                    <div class="name">{{ game.name }}</div>
+                    <div class="stat">{{ game.owners }} 人共 {{ game.playtime }} h</div>
+                </div>
+                <div class="stat">群友游玩总时长：{{ game.score }} 分钟</div>
+                <div class="owners">
+                    {% for owner in game.owner_avatars %}
+                    <img src="{{ owner }}">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="footnote">统计来自群友公开的游玩时长，仅供参考</div>
+</body>
+
+</html>
+
