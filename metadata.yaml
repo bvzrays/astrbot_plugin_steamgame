@@ -1,5 +1,5 @@
 name: astrbot_plugin_steamgame
 version: 1.5.0
 author: bvzrays
-description: Steam 玩家数据可视化插件
-url: https://github.com/bvzrays/astrbot_plugin_steamgame
+description: Steam 玩家数据可视化插件，支持群内排行，pk，以及游戏墙
+repo: https://github.com/bvzrays/astrbot_plugin_steamgame
