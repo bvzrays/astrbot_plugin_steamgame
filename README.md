@@ -1,4 +1,4 @@
-# AstrBot Steam Game Plugin
+# 如果觉得好用请点个star
 
 一个用于 AstrBot 的 Steam 玩家数据可视化插件，生成精美图，支持群排行、好友对比、成就卡片、热点游戏推荐、VAC 提示与 Steam 联动等功能。
 
