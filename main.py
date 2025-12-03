@@ -3,7 +3,7 @@ import json
 import difflib
 import asyncio
 from pathlib import Path
-from typing import Optional, Tuple, Dict, List
+from typing import Optional, Tuple, Dict, List, Any
 import aiohttp
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register, StarTools
@@ -11,7 +11,7 @@ from astrbot.api import logger
 from astrbot.api import message_components as Comp
 from .steam_api import SteamAPI
 
-@register("steam_game", "bvzrays", "Steam Player Data Visualization", "1.5.0", "https://github.com/bvzrays/astrbot_plugin_steamgame")
+@register("steam_game", "bvzrays", "Steam Player Data Visualization", "1.6.0", "https://github.com/bvzrays/astrbot_plugin_steamgame")
 class SteamGamePlugin(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
@@ -238,6 +238,29 @@ class SteamGamePlugin(Star):
                 continue
             games[idx]["cover_uri"] = cover
 
+    def _ensure_static_avatar(self, summary: Optional[Dict[str, Any]], size: str = "full") -> str:
+        """
+        Steam 会在用户设置动态头像时返回 gif，这里将其转换为 jpg，避免 HTML 渲染时出现动图。
+        """
+        if not summary:
+            return ""
+        avatar_url = summary.get("avatarfull", "") if size == "full" else summary.get("avatarmedium", "")
+        avatar_hash = summary.get("avatarhash")
+        if avatar_url and avatar_url.endswith(".gif"):
+            if avatar_hash:
+                suffix_map = {
+                    "full": "_full",
+                    "medium": "_medium",
+                    "small": "",
+                }
+                suffix = suffix_map.get(size, "_full")
+                avatar_url = f"https://avatars.cloudflare.steamstatic.com/{avatar_hash}{suffix}.jpg"
+            else:
+                avatar_url = avatar_url[:-4] + ".jpg"
+        if avatar_url:
+            summary["avatarfull"] = avatar_url
+        return avatar_url
+
     async def _resolve_target(self, event: AstrMessageEvent, arg: str, allow_fallback: bool = True) -> str:
         """
         Resolve Steam ID from argument.
@@ -247,22 +270,33 @@ class SteamGamePlugin(Star):
         - Digits: Use as Steam ID directly.
         """
         # 1. Check if mentioned
+        save_needed = False
+        group_id = event.get_group_id()
+        steam_id = None
+
         for component in event.message_obj.message:
             if isinstance(component, Comp.At):
                 target_user_id = str(component.qq)
-                return self.bindings.get(target_user_id)
+                steam_id = self.bindings.get(target_user_id)
+                if steam_id and group_id and self._link_user_to_group(target_user_id, group_id):
+                    save_needed = True
+                break
         
         # 2. Check if explicit ID (digits)
-        if arg and arg.isdigit() and len(arg) > 10: # Simple check for Steam ID format
-            return arg
+        if not steam_id and arg and arg.isdigit() and len(arg) > 10: # Simple check for Steam ID format
+            steam_id = arg
             
         # 3. Default: Use sender's ID
-        if allow_fallback:
+        if not steam_id and allow_fallback:
             user_id = str(event.get_sender_id())
-            return self.bindings.get(user_id)
-        return None
+            steam_id = self.bindings.get(user_id)
+            if steam_id and group_id and self._link_user_to_group(user_id, group_id):
+                save_needed = True
+        if save_needed:
+            self._save_bindings()
+        return steam_id
 
-    @filter.command("绑定steam")
+    @filter.command("绑定steam", prefix_optional=True)
     async def bind(self, event: AstrMessageEvent, steam_id: str = ""):
         '''绑定 Steam ID（在新的群聊中可不填参数同步已有绑定）'''
         user_id = str(event.get_sender_id())
@@ -308,6 +342,7 @@ class SteamGamePlugin(Star):
         if not summary:
             yield event.plain_result("未找到该 Steam 用户，请检查 ID 是否正确，或检查网络/代理设置。")
             return
+        self._ensure_static_avatar(summary)
 
         is_private = summary.get("communityvisibilitystate", 1) != 3
         
@@ -384,7 +419,7 @@ class SteamGamePlugin(Star):
         )
         yield event.image_result(img_url)
 
-    @filter.command("steam动态")
+    @filter.command("steam动态", prefix_optional=True)
     async def steam_activity(self, event: AstrMessageEvent, arg: str = ""):
         '''查看 Steam 动态 (头像 + 最近活动)'''
         steam_id = await self._resolve_target(event, arg)
@@ -393,7 +428,7 @@ class SteamGamePlugin(Star):
 
 
 
-    @filter.command("steam游戏库")
+    @filter.command("steam游戏库", prefix_optional=True)
     async def steam_library(self, event: AstrMessageEvent, arg: str = ""):
         '''查看 Steam 完整游戏库 (Mosaic 墙)'''
         steam_id = await self._resolve_target(event, arg)
@@ -401,7 +436,7 @@ class SteamGamePlugin(Star):
             yield result
 
 
-    @filter.command("steam成就")
+    @filter.command("steam成就", prefix_optional=True)
     async def steam_achievement(self, event: AstrMessageEvent, game_name: str):
         '''查看 Steam 游戏成就 (/steam成就 <游戏名>)'''
         if not game_name:
@@ -514,7 +549,7 @@ class SteamGamePlugin(Star):
             render_data,
             options={
                 "width": 700,
-                "full_page": False,
+                "full_page": True,
                 "omit_background": True,
                 "type": "jpeg",
                 "quality": self.image_quality
@@ -522,7 +557,7 @@ class SteamGamePlugin(Star):
         )
         yield event.image_result(img_url)
 
-    @filter.command("steam对比")
+    @filter.command("steam对比", prefix_optional=True)
     async def steam_compare(self, event: AstrMessageEvent, target: str):
         '''对比两人游戏库 (/steam对比 @User)'''
         # Fix: Directly get sender's ID from binding, don't use _resolve_target(event, "") 
@@ -554,6 +589,8 @@ class SteamGamePlugin(Star):
         
         my_summary = await self.steam_api.get_player_summaries(my_id) or {}
         target_summary = await self.steam_api.get_player_summaries(target_id) or {}
+        self._ensure_static_avatar(my_summary)
+        self._ensure_static_avatar(target_summary)
 
         # Calculate Intersection
         my_game_ids = {g["appid"] for g in my_games}
@@ -652,7 +689,7 @@ class SteamGamePlugin(Star):
         )
         yield event.image_result(img_url)
 
-    @filter.command("steam推荐")
+    @filter.command("steam推荐", prefix_optional=True)
     async def steam_recommend(self, event: AstrMessageEvent, arg: str = ""):
         '''群友热门游戏推荐 (/steam推荐 [@用户])'''
         group_id = event.get_group_id()
@@ -726,6 +763,7 @@ class SteamGamePlugin(Star):
         async def get_summary_cached(steam_id: str):
             if steam_id not in summary_cache:
                 summary_cache[steam_id] = await self.steam_api.get_player_summaries(steam_id) or {}
+                self._ensure_static_avatar(summary_cache[steam_id])
             return summary_cache[steam_id]
 
         render_recommendations = []
@@ -734,6 +772,7 @@ class SteamGamePlugin(Star):
             owner_avatars = []
             for owner_id in list(item["owners"])[:6]:
                 summary = await get_summary_cached(owner_id)
+                self._ensure_static_avatar(summary)
                 avatar = summary.get("avatarfull")
                 if avatar:
                     owner_avatars.append(avatar)
@@ -747,6 +786,7 @@ class SteamGamePlugin(Star):
             })
 
         target_summary = await get_summary_cached(target_steam_id)
+        self._ensure_static_avatar(target_summary)
         render_data = {
             "target": {
                 "personaname": target_summary.get("personaname", event.get_sender_name()),
@@ -767,7 +807,7 @@ class SteamGamePlugin(Star):
             render_data,
             options={
                 "width": 800,
-                "full_page": False,
+                "full_page": True,
                 "omit_background": True,
                 "type": "jpeg",
                 "quality": self.image_quality
@@ -775,7 +815,7 @@ class SteamGamePlugin(Star):
         )
         yield event.image_result(img_url)
 
-    @filter.command("steam联动")
+    @filter.command("steam联动", prefix_optional=True)
     async def steam_network(self, event: AstrMessageEvent):
         '''群内 Steam 好友联动与同玩提醒'''
         group_id = event.get_group_id()
@@ -824,6 +864,7 @@ class SteamGamePlugin(Star):
 
         def display_name(steam_id: str) -> str:
             summary = summary_cache.get(steam_id, {})
+            self._ensure_static_avatar(summary)
             return summary.get("personaname") or steam_id
 
         lines = ["👥 群内 Steam 联动概览"]
@@ -849,7 +890,7 @@ class SteamGamePlugin(Star):
 
         yield event.plain_result("\n".join(lines))
 
-    @filter.command("steam排行")
+    @filter.command("steam排行", prefix_optional=True)
     async def steam_top(self, event: AstrMessageEvent, dimension: str = "游戏数"):
         '''群内排行 (/steam排行 [游戏数/时长])'''
         group_id = event.get_group_id()
@@ -896,6 +937,7 @@ class SteamGamePlugin(Star):
             if isinstance(games, list):
                 user_id = user_ids[i]
                 summary = summaries[i] if isinstance(summaries[i], dict) else {}
+                self._ensure_static_avatar(summary)
                 
                 # Calculate metrics
                 game_count = len(games)
@@ -942,7 +984,7 @@ class SteamGamePlugin(Star):
             render_data,
             options={
                 "width": 800,
-                "full_page": False,
+                "full_page": True,
                 "omit_background": True,
                 "type": "jpeg",
                 "quality": self.image_quality
